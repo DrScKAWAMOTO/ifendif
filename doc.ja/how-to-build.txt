@@ -1,0 +1,32 @@
+ビルドの仕方
+------------
+
+ifendif は UNIX OS で動作するように作られています。
+ifendif は FreeBSD, Linux そして OS X でテストしました。
+
+必要要件
+
+1. ソースをコンパイルするのに ANSI **C++ compiler** が必要です。
+2. ビルドプロセスをコンフィギュアするのに **cmake** が必要です。
+3. コンフィギュア中に依存関係を見つけるのに **pkg-config** が必要です。
+4. ビルドを実行するのに **make** が必要です。Makefiles は cmake により自動的に生成されます。
+5. ifendif を実行するのに **cmdrecplay** が必要です。
+6. ifendif を実行するのに **clang** が必要です。
+
+
+ビルドの最良の方法は、ビルドディレクトリを別に作成する方法です。
+以下のように実行します。
+
+    mkdir build
+    cd build
+    cmake ..
+    make all
+    sudo make install # インストールする
+
+cmake に引数を渡してコンフィギュアしたい時は例えば以下のようにします。
+
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Debug ..
+    make all
+

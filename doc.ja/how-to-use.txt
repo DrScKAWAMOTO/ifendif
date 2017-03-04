@@ -1,0 +1,43 @@
+emacs ユーザ
+------------
+
+インストールが終われば、以下をあなたの init.el ファイルに書き入れてください。
+
+    (autoload 'if-endif-gray-out-invalidated "if-endif"
+       "Gray out C/C++ source lines invalidated by `if directives'." t)
+    (global-set-key (kbd "C-c i") 'if-endif-gray-out-invalidated)
+
+
+まず、cmdrec を使ってあなたのソースコードをコンパイルします。
+
+    cmdrec clang -D...<etc> your_source_code.c
+
+あるいは
+
+    cmdrec make
+
+とします。
+
+次に emacs を起動して、あなたのソースファイルを find-file します。
+そして C-c i と入力してください。
+
+
+コマンドとしての使い方
+----------------------
+
+インストールが終われば、cmdrecplay と clang もインストールしてください。
+
+まず、cmdrec を使ってあなたのソースコードをコンパイルします。
+
+    cmdrec clang -D...<etc> your_source_code.c
+
+あるいは
+
+    cmdrec make
+
+とします。
+
+次に ifendif を実行します。
+
+    ifendif your_source_code.c
+
