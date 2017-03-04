@@ -7,6 +7,7 @@ add_definitions(-D_GNU_SOURCE)
 
 link_directories(${LIBCONFIG_LIBRARY_DIRS})
 add_executable(ifendif
+    AtExitUnlink.cc
     Expanded.cc
     FillTheSkips.cc
     LineBuffer.cc

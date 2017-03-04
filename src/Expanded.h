@@ -19,7 +19,6 @@ class Expanded : public LineBuffer {
   // members
 protected:
   char p_realpath[PATH_MAX];
-  char p_expanded_filename[PATH_MAX];
   FILE* p_expanded;
 
   // private tools

@@ -1,5 +1,5 @@
 /*
- * Project: time-series/average
+ * Project: ifendif
  * Version: 1.0
  * Copyright: (C) 2017 Dr.Sc.KAWAMOTO,Takuji (Ext)
  * Create: 2017/03/02 22:49:00 JST

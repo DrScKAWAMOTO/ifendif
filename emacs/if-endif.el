@@ -21,21 +21,37 @@
 ;;; ifendif command related
 ;;;      gray out C/C++ source lines invalidated by `if directives'.
 ;;;
-;;; After installation, write the followings in your init.el file
+;;; After installation, install ifendif, cmdrecplay and clang too.
+;;; Write the followings in your `init.el` file.
 ;;;
-;;;    (autoload 'if-endif-gray-out-invalidated "if-endif"
-;;;       "Gray out C/C++ source lines invalidated by `if directives'." t)
-;;;    (global-set-key (kbd "C-c i") 'if-endif-gray-out-invalidated)
+;;;     (autoload 'if-endif-gray-out-invalidated "if-endif"
+;;;        "Gray out C/C++ source lines invalidated by `if directives'." t)
+;;;     (autoload 'if-endif-gray-out-invalidated-all-buffers "if-endif"
+;;;        "Gray out C/C++ source lines invalidated by `if directives'." t)
+;;;     (add-hook 'c-mode-common-hook 'if-endif-gray-out-invalidated)
+;;;     (global-set-key (kbd "C-c i") 'if-endif-gray-out-invalidated)
+;;;     (global-set-key (kbd "C-c I") 'if-endif-gray-out-invalidated-all-buffers)
+;;;
+;;; To associate with the `compile' command, write as follows too.
+;;;
+;;;     (require 'if-endif)
+;;;     (setq compile-command "LANG=C cmdrec -- make -k ")
+;;;     (advice-add 'compile :around #'if-endif-advice-around-compile)
+;;;     (advice-add 'recompile :around #'if-endif-advice-around-compile)
 ;;;
 ;;; First, compile your soruce codes by,
 ;;;
-;;;     cmdrec clang -D...<etc> your_source_code.c
+;;;     cmdrec -- clang -D...<etc> your_source_code.c
 ;;;
 ;;; or
 ;;;
-;;;     cmdrec make
+;;;     cmdrec -- make
 ;;;
-;;; Next, execute emacs and find-file your_source_code.c, then type C-c i e.
+;;; Next, execute emacs and find-file 'your_source_code.c'.
+;;; When editing is repeated and the display becomes distorted, enter 'C-c i' and
+;;; redisplay it.
+;;; Also, if you change the macro definition of the makefile, re-execute
+;;; 'cmdrec - make' and enter 'C-c i' to redisplay it.
 ;;;
 
 (defgroup if-endif nil
@@ -117,6 +133,25 @@
       (call-process "ifendif" nil "*if-endif output*" nil "-e" arg)
       ))
   (eval-buffer (get-buffer "*if-endif output*")))
+
+(defun if-endif-gray-out-invalidated-buffer (buffer)
+  (save-excursion
+    (set-buffer buffer)
+    (if (or (eq major-mode 'c-mode) (eq major-mode 'c++-mode))
+        (if-endif-gray-out-invalidated))))
+
+(defun if-endif-gray-out-invalidated-all-buffers ()
+  "Gray out the lines invalidated by #if #endif directives for all buffers."
+  (interactive)
+  (mapcar 'if-endif-gray-out-invalidated-buffer (buffer-list)))
+
+(defun if-endif-sentinel (process event)
+  (if (eq event "finished\n")
+      (mapcar 'if-endif-gray-out-invalidated-buffer (buffer-list))))
+
+(defun if-endif-advice-around-compile (f &rest args)
+  "Gray out the lines invalidated by #if #endif directives for all buffers."
+  (set-process-sentinel (get-buffer-process (apply f args)) 'if-endif-sentinel))
 
 (get-buffer-create "*if-endif output*")
 

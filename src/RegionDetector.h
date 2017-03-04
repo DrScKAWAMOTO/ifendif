@@ -27,7 +27,6 @@ class RegionDetector {
 
   // members
 protected:
-  char p_detector_file_name[PATH_MAX];
   std::vector<int> p_line_no_of_if_directives;
   std::vector<int> p_kind_of_if_directives;
   std::vector<int> p_line_no_of_region_magic_lines;

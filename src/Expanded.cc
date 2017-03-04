@@ -11,6 +11,7 @@
 #include <assert.h>
 
 #include "Expanded.h"
+#include "AtExitUnlink.h"
 
 #define COMMAND_BUFFER_LENGTH 1000
 
@@ -21,22 +22,25 @@ Expanded::Expanded(const char* detector, const char* source)
       perror("ifendif realpath");
       exit(1);
     }
-  strcpy(p_expanded_filename, detector);
-  char* offset = strrchr(p_expanded_filename, '.');
+  char expanded_filename[PATH_MAX];
+  strcpy(expanded_filename, detector);
+  char* offset = strrchr(expanded_filename, '.');
   if (!offset)
-    offset = p_expanded_filename + strlen(p_expanded_filename);
+    offset = expanded_filename + strlen(expanded_filename);
   strcpy(offset, ".e");
   char command_buffer[COMMAND_BUFFER_LENGTH];
   int length = strlen(source);
   offset = strrchr(source, '.');
   if ((length >= 2) && (offset - source + 2 == length) && (strcmp(offset, ".c") == 0))
     sprintf(command_buffer, "cmdplay -f %s -- c-prepro -o %s %s",
-            source, p_expanded_filename, detector);
+            source, expanded_filename, detector);
   else
     sprintf(command_buffer, "cmdplay -f %s -- c++-prepro -o %s %s",
-            source, p_expanded_filename, detector);
+            source, expanded_filename, detector);
+  AtExitUnlink aeu(expanded_filename);
+  aeu.enter();
   system(command_buffer);
-  p_expanded = fopen(p_expanded_filename, "r");
+  p_expanded = fopen(expanded_filename, "r");
   if (!p_expanded)
     {
       printf("ifendif: cmdplay 関連のエラー(%s:%d) !!\n",  __FILE__, __LINE__);
@@ -48,9 +52,6 @@ Expanded::Expanded(const char* detector, const char* source)
 Expanded::~Expanded()
 {
   fclose(p_expanded);
-#if !defined(DEBUG)
-  unlink(p_expanded_filename);
-#endif
 }
 
 bool Expanded::read_line()

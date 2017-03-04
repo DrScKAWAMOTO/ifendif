@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 #include "RegionDetector.h"
+#include "AtExitUnlink.h"
 
 static char* argv0;
 
@@ -23,6 +24,7 @@ void usage()
   printf("\t-v ....... ifディレクティブの種類も表示する\n");
   printf("\t           I(#if),D(#ifdef),N(#ifndef),L(#else),LI(#elif),E(#endif)\n");
   printf("\t-e ....... if-endif.el 用出力\n");
+  printf("\t-d ....... ワークファイルを削除しない\n");
   exit(0);
 }
 
@@ -30,6 +32,7 @@ int main(int argc, char* argv[])
 {
   bool verbose = false;
   bool if_endif_el = false;
+  bool debug = false;
   argv0 = argv[0];
   ++argv;
   --argc;
@@ -47,9 +50,17 @@ int main(int argc, char* argv[])
           ++argv;
           --argc;
         }
+      if (strcmp(argv[0], "-d") == 0)
+        {
+          debug = true;
+          ++argv;
+          --argc;
+        }
     }
   if (argc != 1)
     usage();
+  if (!debug)
+    AtExitUnlink::initialize();
   RegionDetector detector(argv[0], verbose, if_endif_el);
   return 0;
 }

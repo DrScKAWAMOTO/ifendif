@@ -16,6 +16,7 @@
 #include "Source.h"
 #include "Expanded.h"
 #include "FillTheSkips.h"
+#include "AtExitUnlink.h"
 
 IfDirectiveKind RegionDetector::p_is_if_directive(const char* line)
 {
@@ -103,18 +104,21 @@ void RegionDetector::p_if_endif_el_show_to_end_of_file()
 
 RegionDetector::RegionDetector(const char* source, bool verbose, bool if_endif_el)
 {
+  char detector_file_name[PATH_MAX];
   const char* ptr = strrchr(source, '/');
   int size = 0;
   if (ptr)
     {
       size = ptr - source + 1;
-      strncpy(p_detector_file_name, source, size);
+      strncpy(detector_file_name, source, size);
       ptr++;
     }
   else
     ptr = source;
-  sprintf(p_detector_file_name + size, "TK-ifendif-%s", ptr);
-  FILE* output = fopen(p_detector_file_name, "w");
+  sprintf(detector_file_name + size, "TK-ifendif-%s", ptr);
+  AtExitUnlink aeu(detector_file_name);
+  aeu.enter();
+  FILE* output = fopen(detector_file_name, "w");
   Source src(source);
   int region_number = 0;
   bool is_after_if_directives = true;
@@ -142,7 +146,7 @@ RegionDetector::RegionDetector(const char* source, bool verbose, bool if_endif_e
       fprintf(output, "%s", line);
     }
   fclose(output);
-  Expanded exp(p_detector_file_name, source);
+  Expanded exp(detector_file_name, source);
   FillTheSkips fts(&exp);
   for (int i = 0; i < p_line_no_of_region_magic_lines.size(); ++i)
     {
@@ -227,7 +231,7 @@ RegionDetector::RegionDetector(const char* source, bool verbose, bool if_endif_e
 #if defined(DEBUG)
   {
     int line_count = 0;
-    Source src(p_detector_file_name);
+    Source src(detector_file_name);
     FILE* src_out = fopen("source.lst", "w");
     if (!src_out)
       {
@@ -242,7 +246,7 @@ RegionDetector::RegionDetector(const char* source, bool verbose, bool if_endif_e
         line_count++;
       }
     fclose(src_out);
-    Expanded exp(p_detector_file_name, source);
+    Expanded exp(detector_file_name, source);
     FillTheSkips fts(&exp);
     FILE* exp_out = fopen("expanded.lst", "w");
     if (!exp_out)
@@ -258,8 +262,6 @@ RegionDetector::RegionDetector(const char* source, bool verbose, bool if_endif_e
       }
     fclose(exp_out);
   }
-#else
-  unlink(p_detector_file_name);
 #endif
 }
 
