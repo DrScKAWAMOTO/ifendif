@@ -126,13 +126,23 @@
 (defun if-endif-gray-out-invalidated ()
   "Gray out the lines invalidated by #if #endif directives."
   (interactive)
-  (save-excursion
-    (let ((arg (format "%s" buffer-file-name)))
+  (let ((arg (format "%s" buffer-file-name))
+        (nextline 1)
+        (doexec nil))
+    (save-excursion
       (set-buffer "*if-endif output*")
       (erase-buffer)
       (call-process "ifendif" nil "*if-endif output*" nil "-e" arg)
+      (goto-line 2)
+      (setq nextline (- (point) 1))
+      (setq doeval (string= (buffer-substring 1 2) "("))
+      (if doeval
+          nil
+        (goto-char 1)
+        (search-forward " ")
+        (message (buffer-substring (point) nextline))
       ))
-  (eval-buffer (get-buffer "*if-endif output*")))
+  (if doeval (eval-buffer (get-buffer "*if-endif output*")))))
 
 (defun if-endif-gray-out-invalidated-buffer (buffer)
   (save-excursion
