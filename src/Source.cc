@@ -11,10 +11,15 @@
 
 Source::Source(const char* source)
 {
+  if (!source)
+    {
+      printf("ifendif: ソースファイルが指定されていません !!\n");
+      exit(1);
+    }
   p_input = fopen(source, "r");
   if (!p_input)
     {
-      printf("ifendif: ソースファイル `%s' がみつかりません !!\n", source);
+      printf("ifendif: ソースファイル `%s' がみつかりません2 !!\n", source);
       exit(1);
     }
 }

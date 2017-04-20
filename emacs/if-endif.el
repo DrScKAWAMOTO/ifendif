@@ -129,20 +129,23 @@
   (let ((arg (format "%s" buffer-file-name))
         (nextline 1)
         (doexec nil))
-    (save-excursion
-      (set-buffer "*if-endif output*")
-      (erase-buffer)
-      (call-process "ifendif" nil "*if-endif output*" nil "-e" arg)
-      (goto-line 2)
-      (setq nextline (- (point) 1))
-      (setq doeval (string= (buffer-substring 1 2) "("))
-      (if doeval
-          nil
-        (goto-char 1)
-        (search-forward " ")
-        (message (buffer-substring (point) nextline))
-      ))
-  (if doeval (eval-buffer (get-buffer "*if-endif output*")))))
+    ;;(message (format "if-endif-gray-out-invalidated buffer-name=%s" (buffer-name)))
+    ;;(message (format "if-endif-gray-out-invalidated buffer-file-name=%s" arg))
+    (when buffer-file-name
+      (save-excursion
+        (set-buffer "*if-endif output*")
+        (erase-buffer)
+        (call-process "ifendif" nil "*if-endif output*" nil "-e" arg)
+        (goto-line 2)
+        (setq nextline (- (point) 1))
+        (setq doeval (string= (buffer-substring 1 2) "("))
+        (if doeval
+            nil
+          (goto-char 1)
+          (search-forward " ")
+          (message (buffer-substring (point) nextline))
+          ))
+      (if doeval (eval-buffer (get-buffer "*if-endif output*"))))))
 
 (defun if-endif-gray-out-invalidated-buffer (buffer)
   (save-excursion
@@ -156,12 +159,14 @@
   (mapcar 'if-endif-gray-out-invalidated-buffer (buffer-list)))
 
 (defun if-endif-sentinel (process event)
-  (if (eq event "finished\n")
-      (mapcar 'if-endif-gray-out-invalidated-buffer (buffer-list))))
+  (when (string= event "finished\n")
+    (mapcar 'if-endif-gray-out-invalidated-buffer (buffer-list))))
 
 (defun if-endif-advice-around-compile (f &rest args)
   "Gray out the lines invalidated by #if #endif directives for all buffers."
   (set-process-sentinel (get-buffer-process (apply f args)) 'if-endif-sentinel))
+
+(add-hook 'after-save-hook 'if-endif-gray-out-invalidated-all-buffers)
 
 (get-buffer-create "*if-endif output*")
 

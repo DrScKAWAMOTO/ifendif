@@ -119,6 +119,11 @@ RegionDetector::RegionDetector(const char* source, bool verbose, bool if_endif_e
   AtExitUnlink aeu(detector_file_name);
   aeu.enter();
   FILE* output = fopen(detector_file_name, "w");
+  if (!source)
+    { /* TODO */
+      printf("ifendif: source が指定されていません !!\n");
+      exit(1);
+    }
   Source src(source);
   int region_number = 0;
   bool is_after_if_directives = true;
@@ -231,6 +236,11 @@ RegionDetector::RegionDetector(const char* source, bool verbose, bool if_endif_e
 #if defined(DEBUG)
   {
     int line_count = 0;
+    if (!detector_file_name)
+      { /* TODO */
+        printf("ifendif: detector_file_name が指定されていません !!\n");
+        exit(1);
+      }
     Source src(detector_file_name);
     FILE* src_out = fopen("source.lst", "w");
     if (!src_out)
