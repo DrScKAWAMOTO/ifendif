@@ -164,7 +164,10 @@
 
 (defun if-endif-advice-around-compile (f &rest args)
   "Gray out the lines invalidated by #if #endif directives for all buffers."
-  (set-process-sentinel (get-buffer-process (apply f args)) 'if-endif-sentinel))
+  (let ((ret (apply f args)))
+    (message "if-endif-advice-around-compile called")
+    (set-process-sentinel (get-buffer-process ret) 'if-endif-sentinel)
+    ret))
 
 (add-hook 'after-save-hook 'if-endif-gray-out-invalidated-all-buffers)
 
