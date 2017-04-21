@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.7.1)
 
 project(ifendif)
 set(IFENDIF_VERSION "1.0")
