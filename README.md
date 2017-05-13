@@ -1,3 +1,9 @@
+Information
+===========
+
+Ifendif is merged into cmdrecplay, so see [cmdrecplay](https://github.com/DrScKAWAMOTO/cmdrecplay).
+
+
 ifendif
 =======
 
